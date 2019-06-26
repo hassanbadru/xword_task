@@ -5,6 +5,7 @@ from django.views.generic import TemplateView
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
+import logging
 
 from .models import Puzzle, Entry, Clue
 from .forms import EntryForm
@@ -19,6 +20,7 @@ class LogInView(TemplateView):
         # initialize new session
         self.request.session['total'] = 0
         self.request.session['correct'] = 0
+        self.request.session['repeat'] = False
 
         if self.request.session.has_key('clue_id'):
             del self.request.session['clue_id']
@@ -31,23 +33,57 @@ class DrillView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(DrillView, self).get_context_data(**kwargs)
+        repeat = False
 
-        # fetch random clue
-        random_clue = Clue.objects.order_by("?").first()
-        clue_id = random_clue.id
-        print(random_clue)
+        if self.request.session.has_key('repeat'):
+           repeat = self.request.session['repeat']
 
+        if repeat:
+           clue_id = self.request.session['clue_id']
 
-        self.request.session['clue_id'] = clue_id
-        self.request.session['total'] += 1
+           try:
+               random_clue = Clue.objects.get(pk=clue_id)
+           except Clue.DoesNotExist:
+               raise Http404("Such Clue Does Not Exist")
+
+        else:
+           random_clue = Clue.objects.order_by("?").first()
+           clue_id = random_clue.id
+
+           self.request.session['clue_id'] = clue_id
+           self.request.session['total'] += 1
+           self.request.session['success'] = False
 
         context['entry_form'] = EntryForm()
         context['random_clue'] = random_clue
         return context
 
+
     def post(self, request, *args, **kwargs):
+
+        if request.session.has_key('clue_id'):
+            clue_id = self.request.session['clue_id']
+
         entry_form = EntryForm(request.POST or None)
-        print(entry_form.is_valid())
+        entry_text = entry_form['entry_text'].value()
+        logger = logging.getLogger(__name__)
+
+        if entry_text and entry_form.is_valid():
+            clue_match = Clue.objects.get(pk=clue_id)
+            entry_match = Entry.objects.filter(entry_text=entry_text.upper()).first()
+
+            if entry_match == clue_match.entry:
+                # keep track of success
+                logger.info('Match found')
+                self.request.session['correct'] += 1
+                self.request.session['repeat'] = False
+                self.request.session['success'] = True
+
+                # Redirects to the view product of product details and for review
+                return HttpResponseRedirect(reverse('answer'))
+
+            logger.info("Match not found")
+            request.session['repeat'] = True
         return HttpResponseRedirect(reverse('drill'))
 
 
@@ -66,6 +102,9 @@ class AnswerView(TemplateView):
 
        else:
           return HttpResponseRedirect(reverse('drill'))
+
+       if self.request.session.has_key('repeat'):
+          del self.request.session['repeat']
 
        # get clue information from DB
        try:

@@ -20,7 +20,6 @@
   <h4> <u>All puzzles ({{ puzzles|length }}) where clue appeared: </u></h4>
   <ol>
     {% for puzzle in puzzles %}
-    <!-- # {{puzzle.id}} -->
     <li> <h5> {{ puzzle.byline }} by <i> {{ puzzle.publisher }} </i> on {{ puzzle.date }}  </h5></li>
     {% endfor %}
   </ol>
