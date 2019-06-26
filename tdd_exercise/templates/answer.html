@@ -4,9 +4,19 @@
 {% block content %}
 
 
-<div>
+<div class="row form-group">
 
-  <div>
+  <div class="col-md-6 register-form">
+
+    <div>
+      {% if success %}
+        <h4 style="color:green"> Congratulations, you answer was correct </h4>
+      {% endif %}
+      
+      <b>Total Clues: </b>{{total}}
+      <b>Correct answers: </b> {{correct}}
+    </div>
+    <hr />
 
   {% if clue %}
   <div>
@@ -26,8 +36,8 @@
   {% endif %}
 
   <div>
-    <a href="{% url 'drill' %}" > Next Drill </a>
-    <a href="{% url 'login' %}"> End Game </a>
+    <a class="btn btn-success" href="{% url 'drill' %}" > Next Drill > </a>
+    <a class="btn btn-danger" href="{% url 'login' %}"> End Game </a>
   </div>
 
 </div>

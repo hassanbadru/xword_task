@@ -5,9 +5,21 @@
 {% block content %}
 {% if random_clue %}
 
-      <div class="row">
+      <div class="row form-group">
      <div class="col-md-7">
        <form action="" method="post">
+
+         <div>
+          {% if repeat %}
+          <h6 style="text-align: left; color:red">Wrong Answer</h6>
+          {% endif %}
+            <div>
+              <b>Total Clues: </b>{{total}}
+              <b>Correct answers: </b> {{correct}}
+            </div>
+          </div>
+          <hr />
+
          <div>
          <h4><u>Clue:</u>  <i>" {{random_clue.clue_text}} "<i/></h4>
          </div>
@@ -16,16 +28,21 @@
          {% csrf_token %}
 
          <div>
+         <div class = "form-group" style="text-align: left">
            <i>Type in your guess below</i>
           {% for field in entry_form %}
            <div>{{field}}</div>
           {% endfor %}
+          </div>
 
-           <h6 ><b> Number of Entry words: </b> {{ random_clue.entry.entry_text|length }} </h6>
+           <h6 style="text-align: left; color: #aaa"><b> Number of Entry words: </b> {{ random_clue.entry.entry_text|length }} </h6>
          </div>
 
-          <button type= "submit">Submit Guess</button>
-          <a href="{% url 'login' %}"> End Game </a>
+          <button class="btn btn-primary" type= "submit">Submit Guess</button>
+           {% if repeat is not True %}
+           <a href="{% url 'drill' %}" class="btn btn-outline-secondary"> Skip > </a>
+           {% endif %}
+          <a class="btn btn-danger" href="{% url 'login' %}"> End Game </a>
          </div>
 
        </form>
@@ -43,8 +60,8 @@
       </div>
        </div>
 
-       <div>
-          <a href="{% url 'answer' %}"> View Solution </a>
+       <div  style="background-color: #e3f2fd; padding: 20px">
+          <a class="btn btn-warning" href="{% url 'answer' %}"> View Solution </a>
           <i style="color:red; font-size: 12px">This escape option counts against your total score </i>
       </div>
 

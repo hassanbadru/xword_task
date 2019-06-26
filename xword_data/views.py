@@ -54,8 +54,14 @@ class DrillView(TemplateView):
            self.request.session['total'] += 1
            self.request.session['success'] = False
 
+        print(random_clue)
         context['entry_form'] = EntryForm()
         context['random_clue'] = random_clue
+        context['repeat'] = repeat
+
+        context['total'] = self.request.session['total']
+        context['correct'] = self.request.session['correct']
+
         return context
 
 
@@ -66,12 +72,15 @@ class DrillView(TemplateView):
 
         entry_form = EntryForm(request.POST or None)
         entry_text = entry_form['entry_text'].value()
-        logger = logging.getLogger(__name__)
 
-        if entry_text and entry_form.is_valid():
+        if not isinstance(entry_text, str):
+            raise Exception('Entry Text must be a string')
+
+        if entry_text:
             clue_match = Clue.objects.get(pk=clue_id)
             entry_match = Entry.objects.filter(entry_text=entry_text.upper()).first()
 
+            logger = logging.getLogger(__name__)
             if entry_match == clue_match.entry:
                 # keep track of success
                 logger.info('Match found')
@@ -115,8 +124,12 @@ class AnswerView(TemplateView):
 
        # get information for puzzles that include clue text
        puzzles = Puzzle.objects.get_clue_puzzles(clue.clue_text)
+
        context['puzzles'] = puzzles
-
-
        context['clue'] = clue
+
+       context['total'] = self.request.session['total']
+       context['correct'] = self.request.session['correct']
+       context['success'] = self.request.session['success']
+
        return context
