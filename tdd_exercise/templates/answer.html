@@ -12,7 +12,7 @@
       {% if success %}
         <h4 style="color:green"> Congratulations, you answer was correct </h4>
       {% endif %}
-      
+
       <b>Total Clues: </b>{{total}}
       <b>Correct answers: </b> {{correct}}
     </div>
@@ -37,7 +37,7 @@
 
   <div>
     <a class="btn btn-success" href="{% url 'drill' %}" > Next Drill > </a>
-    <a class="btn btn-danger" href="{% url 'login' %}"> End Game </a>
+    <a class="btn btn-danger" href="{% url 'login' %}"> End Drill </a>
   </div>
 
 </div>

@@ -27,9 +27,9 @@
          <div>
          {% csrf_token %}
 
-         <div>
+         <div style="padding: 5px">
          <div class = "form-group" style="text-align: left">
-           <i>Type in your guess below</i>
+           <i style="font-size: 13px">Type in your guess below</i>
           {% for field in entry_form %}
            <div>{{field}}</div>
           {% endfor %}
@@ -40,9 +40,9 @@
 
           <button class="btn btn-primary" type= "submit">Submit Guess</button>
            {% if repeat is not True %}
-           <a href="{% url 'drill' %}" class="btn btn-outline-secondary"> Skip > </a>
+           <a href="{% url 'drill' %}" class="btn btn-outline-secondary"> Skip Clue > </a>
            {% endif %}
-          <a class="btn btn-danger" href="{% url 'login' %}"> End Game </a>
+          <a class="btn btn-danger" href="{% url 'login' %}"> End Drill </a>
          </div>
 
        </form>
