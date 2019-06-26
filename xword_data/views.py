@@ -136,9 +136,13 @@ class AnswerView(TemplateView):
        # get information for puzzles that include clue text
        puzzles = Puzzle.objects.get_clue_puzzles(clue.clue_text)
 
+       # get information of other clues with the same entry
+       other_clues =  Clue.objects.filter(entry=clue.entry)
+
        # add data to context for templates
        context['puzzles'] = puzzles
        context['clue'] = clue
+       context['other_clues'] = other_clues
 
        context['total'] = self.request.session['total']
        context['correct'] = self.request.session['correct']
