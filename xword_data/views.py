@@ -6,6 +6,7 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 import logging
+import six
 
 from .models import Puzzle, Entry, Clue
 from .forms import EntryForm
@@ -35,9 +36,11 @@ class DrillView(TemplateView):
         context = super(DrillView, self).get_context_data(**kwargs)
         repeat = False
 
+        # check session if clue is repeated
         if self.request.session.has_key('repeat'):
            repeat = self.request.session['repeat']
 
+        # check if clue is being repeated, get clue instance
         if repeat:
            clue_id = self.request.session['clue_id']
 
@@ -47,6 +50,7 @@ class DrillView(TemplateView):
                raise Http404("Such Clue Does Not Exist")
 
         else:
+           # Initialize values for new clue instance
            random_clue = Clue.objects.order_by("?").first()
            clue_id = random_clue.id
 
@@ -54,7 +58,7 @@ class DrillView(TemplateView):
            self.request.session['total'] += 1
            self.request.session['success'] = False
 
-        print(random_clue)
+        # add data to context for templates
         context['entry_form'] = EntryForm()
         context['random_clue'] = random_clue
         context['repeat'] = repeat
@@ -66,33 +70,39 @@ class DrillView(TemplateView):
 
 
     def post(self, request, *args, **kwargs):
+        # check if clue id exists in current session / if not, redirect to drill page
+        if not request.session.has_key('clue_id'):
+            self.request.session['repeat'] = False
+            return HttpResponseRedirect(reverse('drill'))
 
-        if request.session.has_key('clue_id'):
-            clue_id = self.request.session['clue_id']
+        # Get clue ID
+        clue_id = self.request.session['clue_id']
 
+        # Fetch POST field from Entry Form
         entry_form = EntryForm(request.POST or None)
         entry_text = entry_form['entry_text'].value()
 
-        if not isinstance(entry_text, str):
+        # validate entry text
+        if not isinstance(entry_text, six.text_type):
             raise Exception('Entry Text must be a string')
 
-        if entry_text:
-            clue_match = Clue.objects.get(pk=clue_id)
-            entry_match = Entry.objects.filter(entry_text=entry_text.upper()).first()
+        # Get Clue Data and find match with entry text
+        clue_match = Clue.objects.get(pk=clue_id)
+        entry_match = Entry.objects.filter(entry_text=entry_text.upper()).first()
 
-            logger = logging.getLogger(__name__)
-            if entry_match == clue_match.entry:
-                # keep track of success
-                logger.info('Match found')
-                self.request.session['correct'] += 1
-                self.request.session['repeat'] = False
-                self.request.session['success'] = True
+        logger = logging.getLogger(__name__)
+        if entry_match == clue_match.entry:
+            # keep track of correct answers (int), wrong answer (bool), and success qnw3
+            logger.info('Match found')
+            self.request.session['correct'] += 1
+            self.request.session['repeat'] = False
+            self.request.session['success'] = True
 
-                # Redirects to the view product of product details and for review
-                return HttpResponseRedirect(reverse('answer'))
+            # Redirects to the view product of product details and for review
+            return HttpResponseRedirect(reverse('answer'))
 
-            logger.info("Match not found")
-            request.session['repeat'] = True
+        logger.info("Match not found")
+        request.session['repeat'] = True
         return HttpResponseRedirect(reverse('drill'))
 
 
@@ -106,14 +116,15 @@ class AnswerView(TemplateView):
        context = super(AnswerView, self).get_context_data(**kwargs)
 
        # check if clue id exists in current session / if not, redirect to drill page
-       if self.request.session.has_key('clue_id'):
-          clue_id = self.request.session['clue_id']
+       if not self.request.session.has_key('clue_id'):
+           return HttpResponseRedirect(reverse('drill'))
 
-       else:
-          return HttpResponseRedirect(reverse('drill'))
-
+       # reset repeat clue option to default
        if self.request.session.has_key('repeat'):
-          del self.request.session['repeat']
+          self.request.session['repeat'] = False
+
+       # get clue ID from current session
+       clue_id = self.request.session['clue_id']
 
        # get clue information from DB
        try:
@@ -125,6 +136,7 @@ class AnswerView(TemplateView):
        # get information for puzzles that include clue text
        puzzles = Puzzle.objects.get_clue_puzzles(clue.clue_text)
 
+       # add data to context for templates
        context['puzzles'] = puzzles
        context['clue'] = clue
 

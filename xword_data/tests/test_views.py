@@ -11,7 +11,7 @@ class TestDrillView(TestCase):
     def setUp(self):
         for _unused in range(10):
             ClueFactory()
-        self.url = reverse('xword-drill')
+        self.url = reverse('drill')
 
     def test_drill_get(self):
         response = self.client.get(self.url)
@@ -24,7 +24,7 @@ class TestDrillView(TestCase):
         self.assertTrue(form.find('input', attrs={'name': 'answer', 'type': 'text'}))
         # The page also offers an escape link to get the answer
         clue_id = response.context['clue_id']
-        answer_link_url = reverse('xword-answer', args=(clue_id,))
+        answer_link_url = reverse('answer', args=(clue_id,))
         self.assertTrue(soup.find('a', attrs={'href': answer_link_url}))
 
     def test_drill_post_incorrect(self):
@@ -44,7 +44,7 @@ class TestDrillView(TestCase):
             "answer": clue.entry.entry_text.lower()
         }
         response = self.client.post(self.url, data=data)
-        self.assertRedirects(response, reverse('xword-answer', args=(clue.id,)))
+        self.assertRedirects(response, reverse('answer', args=(clue.id,)))
 
     @tag('stats')
     def test_drill_messaging(self):
@@ -58,7 +58,7 @@ class TestDrillView(TestCase):
             "answer": clue.entry.entry_text
         }
         response = self.client.post(self.url, data=data, follow=True)
-        self.assertRedirects(response, reverse('xword-answer', args=(clue.id,)))
+        self.assertRedirects(response, reverse('answer', args=(clue.id,)))
         # Answer page should show status of how many correct answers have been provided.
         self.assertContains(
             response,
@@ -83,7 +83,7 @@ class TestAnswerView(TestCase):
         # All clues in setup have the same text, any one chosen at random
         # should show the same table of stats for use of that clue.
         clue = Clue.objects.order_by("?").first()
-        response = self.client.get(reverse("xword-answer", args=(clue.pk,)))
+        response = self.client.get(reverse("answer", args=(clue.pk,)))
         self.assertEqual(200, response.status_code)
         soup = BeautifulSoup(response.content, features="html.parser")
         table = soup.find("table")
@@ -103,11 +103,11 @@ class TestAnswerView(TestCase):
     @tag('stats')
     def test_answer_unique(self):
         clue = ClueFactory(clue_text="Unique", entry=EntryFactory(entry_text="SINGLE"))
-        response = self.client.get(reverse("xword-answer", args=(clue.pk,)))
+        response = self.client.get(reverse("answer", args=(clue.pk,)))
         self.assertEqual(200, response.status_code)
         self.assertContains(response, "only appearance of this clue")
 
     def test_answer_nonexistent(self):
         # Rely on DB not using primary key value of 0
-        response = self.client.get(reverse("xword-answer", args=(0,)))
+        response = self.client.get(reverse("answer", args=(0,)))
         self.assertEqual(404, response.status_code)
