@@ -3,4 +3,33 @@
 {% block title %} Crossword Exercise {% endblock %}
 
 {% block content %}
+{% if random_clue %}
+
+      <div>
+       <form action="" method="post">
+
+         <div>
+         <h3><u>Clue:</u></h3>
+         <h5> " {{random_clue.clue_text}} "</h5>
+         </div>
+
+         <div>
+         {% csrf_token %}
+
+         <div>
+           <i>Type in your guess below</i>
+          {% for field in entry_form %}
+           <div>{{field}}</div>
+          {% endfor %}
+         </div>
+
+
+          <button type= "submit">Submit Guess</button>
+          <a href="{% url 'login' %}"> End Game </a>
+         </div>
+
+       </form>
+     </div>
+
+{% endif %}
 {% endblock %}
