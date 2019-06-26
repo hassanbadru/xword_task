@@ -5,12 +5,11 @@
 {% block content %}
 {% if random_clue %}
 
-      <div>
+      <div class="row">
+     <div class="col-md-7">
        <form action="" method="post">
-
          <div>
-         <h3><u>Clue:</u></h3>
-         <h5> " {{random_clue.clue_text}} "</h5>
+         <h4><u>Clue:</u>  <i>" {{random_clue.clue_text}} "<i/></h4>
          </div>
 
          <div>
@@ -21,14 +20,34 @@
           {% for field in entry_form %}
            <div>{{field}}</div>
           {% endfor %}
-         </div>
 
+           <h6 ><b> Number of Entry words: </b> {{ random_clue.entry.entry_text|length }} </h6>
+         </div>
 
           <button type= "submit">Submit Guess</button>
           <a href="{% url 'login' %}"> End Game </a>
          </div>
 
        </form>
+
+       <div>
+         <br/>
+
+         {% if random_clue.puzzle %}
+         <h4> <u>Puzzle where clue appeared: </u></h4>
+         <ol>
+           <li> <h5> {{ random_clue.puzzle.byline }} by <i> {{ random_clue.puzzle.publisher }} </i> on {{ random_clue.puzzle.date }}  </h5></li>
+         </ol>
+         {% endif %}
+
+      </div>
+       </div>
+
+       <div>
+          <a href="{% url 'answer' %}"> View Solution </a>
+          <i style="color:red; font-size: 12px">This escape option counts against your total score </i>
+      </div>
+
      </div>
 
 {% endif %}

@@ -37,6 +37,7 @@ class DrillView(TemplateView):
         clue_id = random_clue.id
         print(random_clue)
 
+
         self.request.session['clue_id'] = clue_id
         self.request.session['total'] += 1
 
@@ -49,10 +50,34 @@ class DrillView(TemplateView):
         print(entry_form.is_valid())
         return HttpResponseRedirect(reverse('drill'))
 
+
+
+
 # view to congratulates the user on their success
 class AnswerView(TemplateView):
     template_name = 'answer.html'
 
     def get_context_data(self, **kwargs):
-        context = super(AnswerView, self).get_context_data(**kwargs)
-        return context
+       context = super(AnswerView, self).get_context_data(**kwargs)
+
+       # check if clue id exists in current session / if not, redirect to drill page
+       if self.request.session.has_key('clue_id'):
+          clue_id = self.request.session['clue_id']
+
+       else:
+          return HttpResponseRedirect(reverse('drill'))
+
+       # get clue information from DB
+       try:
+           clue = Clue.objects.get(pk=clue_id)
+
+       except Clue.DoesNotExist:
+          raise Http404("Such Clue Does Not Exist")
+
+       # get information for puzzles that include clue text
+       puzzles = Puzzle.objects.get_clue_puzzles(clue.clue_text)
+       context['puzzles'] = puzzles
+
+
+       context['clue'] = clue
+       return context

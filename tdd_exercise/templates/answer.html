@@ -2,4 +2,35 @@
 
 {% block title %} Puzzle Answer {% endblock %}
 {% block content %}
+
+
+<div>
+
+  <div>
+
+  {% if clue %}
+  <div>
+    <p> <b> Clue: </b> <i>{{ clue.clue_text }}</i></p>
+  </div>
+  {% endif %}
+
+  <p> <b>Only one (1) Entry exists for this Clue: </b> <br /> {{clue}} </p>
+
+  {% if puzzles %}
+  <h4> <u>All puzzles ({{ puzzles|length }}) where clue appeared: </u></h4>
+  <ol>
+    {% for puzzle in puzzles %}
+    <!-- # {{puzzle.id}} -->
+    <li> <h5> {{ puzzle.byline }} by <i> {{ puzzle.publisher }} </i> on {{ puzzle.date }}  </h5></li>
+    {% endfor %}
+  </ol>
+  {% endif %}
+
+  <div>
+    <a href="{% url 'drill' %}" > Next Drill </a>
+    <a href="{% url 'login' %}"> End Game </a>
+  </div>
+
+</div>
+
 {% endblock %}

@@ -2,7 +2,11 @@
 from __future__ import unicode_literals
 from django.db import models
 from django.db.models.deletion import CASCADE
+from django.db.models.manager import Manager
 
+class PuzzleManager(Manager):
+    def get_clue_puzzles(self, clue_text):
+        return self.filter(_clue_puzzle__clue_text=clue_text)
 
 # Puzzle Model
 class Puzzle(models.Model):
@@ -10,6 +14,8 @@ class Puzzle(models.Model):
     date= models.DateField(null=False)
     byline= models.CharField(null=False, max_length=255)
     publisher = models.CharField(max_length=12)
+
+    objects = PuzzleManager()
 
     def __str__(self):
         return f'{self.byline} by {self.publisher} on {self.date}'
