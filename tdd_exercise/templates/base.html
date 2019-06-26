@@ -4,13 +4,17 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="Crossword puzzle TDD exercise.">
-
-    <title>{% block title %}Crossword Exercise{% endblock %}</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <title>{% block title %}{% endblock %}</title>
   </head>
 
   <body>
-    <!-- Begin page content -->
     <main role="main" class="container">
+      <nav class="navbar navbar-expand-lg" style="height: 40px; width: 100%; background-color: #bbb; margin-bottom: 5px">
+      </nav>
       {% block content %}{% endblock %}
     </main>
   </body>
